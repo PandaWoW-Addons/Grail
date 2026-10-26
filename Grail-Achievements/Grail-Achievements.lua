@@ -6726,8 +6726,10 @@ G[32872]={508306}	-- needed for Battlefield: Barrens (Weekly) of Hordebreaker
 end
 
 if release >= 17359 then
-Grail.extraAchievements['Alliance'][6] = { 507296, 507297, 507312, 507314, 507315, 507310, 507612, 507928, 507533, 507534, 507535, 507536, 508099, 508726, 508727, 508729, 508730, }
-Grail.extraAchievements['Horde'][6] = { 507296, 507297, 507312, 507314, 507315, 507310, 507612, 507929, 507533, 508008, 507535, 507536, 508099, 508726, 508727, 508729, 508730, }
+Grail.extraAchievements['Alliance'][6] = { 507296, 507297, 507312, 507314, 507310, 507612, 507928, 507533, 507534, 507535, 507536, 508099, 508726, 508727, 508729, 508730, }
+Grail.extraAchievements['Horde'][6] = { 507296, 507297, 507312, 507314, 507310, 507612, 507929, 507533, 508008, 507535, 507536, 508099, 508726, 508727, 508729, 508730, }
+Grail.extraAchievements['Alliance'][2] = { 500940, 505318, 505320, 504960, 505452, }
+Grail.extraAchievements['Horde'][2] = { 500940, 504960, 505452, 505319, 505321, }
 G[32956]={508727}
 G[32957]={508727}
 G[32958]={508727}
@@ -6750,6 +6752,17 @@ G[33210]={508729}	-- Blazing
 -- chests.  However, it would be interesting to present the data in something like Wholly.
 end
 
+if release >= 18645 then
+Grail.loremasterAchievements['Alliance'][7] = { 508845, 508920, }
+Grail.loremasterAchievements['Horde'][7] = { 508924, }
+G[33256]={508845}	-- needed for The Light Prevails part of As I Walk Through the Valley of the Shadow of Moon
+G[34019]={508845}	-- needed for Shadows Awaken part of As I Walk Through the Valley of the Shadow of Moon
+G[34054]={508845}	-- needed for A Sister's Sacrifice part of As I Walk Through the Valley of the Shadow of Moon
+G[34099]={508920}	-- needed for The Battle for Shattrath part of Tala-done With This
+G[35015]={508845}	-- needed for Purifying the Gene Pool part of As I Walk Through the Valley of the Shadow of Moon
+G[35151]={508924}	-- needed for Establish a Foothold part of Gorgrond Zone Achievement [PH Name]
+end
+
 Grail.questsLoremaster = {}
 
 -- TODO: Need to delay this until after combat
@@ -6766,7 +6779,7 @@ for _, faction in pairs({'Alliance','Horde'}) do
 	end
 end
 
-if GrailDatabase.debug then debugprofilestart() end
+local debugStartTime = debugprofilestop()
 for questId, achs in pairs(G) do
 	if achs ~= nil then
 		-- Add this quest to its achievements
@@ -6789,15 +6802,19 @@ end
 
 wipe(G)
 G = nil
-if GrailDatabase.debug then print("Done converting achievements to internal structure with elapsed milliseconds: "..debugprofilestop()) end
+Grail.timings.AchievementsInternalConversion = debugprofilestop() - debugStartTime
 
 -- Now we generate the contents of the Loremaster achievements for Pandaria by looking at the specific quests
 -- that are required and add all the quests that are prerequisites for those.
-if GrailDatabase.debug then debugprofilestart() end
+debugStartTime = debugprofilestop()
 local achievementsDone = {}
-local achievementsToZoneMapping = { [506300] = 806, [506301] = 807, [506534] = 806, [506535] = 857, [506536] = 857, [506537] = 809, [506538] = 809, [506539] = 810, [506540] = 858, }
+local achievementsToZoneMapping = { [506300] = 806, [506301] = 807, [506534] = 806, [506535] = 857, [506536] = 857, [506537] = 809, [506538] = 809, [506539] = 810, [506540] = 858, [508845] = 947, [508920]= 946, [508924] = 949, }
+local expansions = { 6 }
+if release >= 18505 then
+	tinsert(expansions, 7)
+end
 for _, faction in pairs({'Alliance', 'Horde'}) do
-	for _, expansion in pairs({6}) do
+	for _, expansion in pairs(expansions) do
 		for _, achievement in pairs(Grail.loremasterAchievements[faction][expansion]) do
 			if not tContains(achievementsDone, achievement) then
 				local newTable = {}
@@ -6808,11 +6825,7 @@ for _, faction in pairs({'Alliance', 'Horde'}) do
 						tinsert(newTable, questId)
 						local controlTable = { ["result"] = {}, ["preq"] = newTable, ["lastIndexUsed"] = 0, ["doMath"] = true }
 						-- Get the entire list of prerequisites for questId and add them to newTable
--- TODO: Deal with the fact that a player who has done tons of quests in Pandaria will get a much faster time processing this.  I believe this is because
--- the quests are complete, and therefore they will not have their prerequsites added properly.  We need to ensure we can set a value (in controlTable)
--- that ensures the current status of the quest when complete does not get ignored for processing prerequisites.
 						Grail._PreparePrerequisiteInfo(Grail:QuestPrerequisites(questId, true), controlTable)
---						Grail:_PreparePrerequisiteInfo(Grail:QuestPrerequisites(questId, true), {}, newTable, 0, true)
 					end
 				end
 				Grail.indexedQuests[achievement] = newTable
@@ -6824,6 +6837,6 @@ for _, faction in pairs({'Alliance', 'Horde'}) do
 end
 wipe(achievementsDone)
 achievementsDone = nil
-if GrailDatabase.debug then print("Done creating Pandaria Loremaster list with elapsed milliseconds: "..debugprofilestop()) end
+Grail.timings.AchievementsPandariaLoremaster = debugprofilestop() - debugStartTime
 
 end

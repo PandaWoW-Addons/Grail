@@ -2,7 +2,7 @@
 ## Title: Grail
 ## Author: Scott M Harrison
 ## Notes: Knows about quests
-## Version: 064
+## Version: 065PR12
 ## SavedVariables: GrailDatabase
 ## SavedVariablesPerCharacter: GrailDatabasePlayer
 
