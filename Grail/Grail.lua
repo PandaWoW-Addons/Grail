@@ -724,6 +724,7 @@ experimental = false,	-- currently this implementation does not reduce memory si
 		currentlyVerifying = false,
 		currentMortalIssues = {},
 		currentQuestIndex = nil,
+		customRaceMapping = { ['VoidElf'] = 'NightElf', ['Nightborne'] = 'BloodElf', ['HighmountainTauren'] = 'Tauren', ['DarkIronDwarf'] = 'Dwarf', ['LightforgedDraenei'] = 'Draenei', ['ZandalariTroll'] = 'Troll', ['KulTiran'] = 'Human', ['MagharOrc'] = 'Orc', ['Vulpera'] = 'Goblin', ['Mechagnome'] = 'Gnome', },
 		debug = false,
 		delayBagUpdate = 0.5,
 		delayedEvents = {},
@@ -886,6 +887,9 @@ experimental = false,	-- currently this implementation does not reduce memory si
 					for code, raceTable in pairs(self.races) do
 						local raceName = raceTable[1]
 						self.raceNameToBitMapping[raceName] = self.races[code][4]
+					end
+					for raceName, baseRaceName in pairs(self.customRaceMapping) do
+						self.raceNameToBitMapping[raceName] = self.raceNameToBitMapping[baseRaceName]
 					end
 					self.classNameToBitMapping = {}
 					self.classBitToCodeMapping = {}
